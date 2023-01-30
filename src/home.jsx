@@ -11,26 +11,46 @@ import {
   ImageBackground,
   Button,
   Pressable,
+  Dimensions,
+  FlatList,
+  LineChart,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as Location from "expo-location";
 import moment from "moment-timezone";
+import {
+  haze,
+  rainy,
+  snowy,
+  sunny,
+  cloudy,
+  mist,
+  thunderstorm,
+  drizzle,
+  fog,
+  smoke,
+  dust,
+  sand,
+  tornado,
+} from "../assets/background";
+import SearchBar from "../components/SearchBar";
 
 const openWheatherKey = "fbb91821e24ca66454240eef4c703e18";
-const API = "https://api.openweathermap.org/data/2.5/weather?q={city name}&appid={API key}"
+// const API =
+//   "https://api.openweathermap.org/data/2.5/weather?q={city name}&appid={API key}";
 
-let url = `https://api.openweathermap.org/data/2.5/onecall?&units=metric&exclude=minutely,hourly,alerts&appid=${openWheatherKey}`;
-const image = {
-  uri: "https://images.hdqwalls.com/download/sunset-at-san-juan-de-chicua-5k-nl-800x1280.jpg",
-};
+let url = `http://api.openweathermap.org/data/2.5/onecall?&units=metric&exclude=minutely&appid=${openWheatherKey}`;
+// let uuu = `http://api.openweathermap.org/data/2.5/onecall?&units=metric&exclude=minutely&appid=${openWeatherKey}`;
 
+// let uri = `https://bulk.openweathermap.org/snapshot/{weather_16_mmddyy_hhmm.json.gz}?appid={fbb91821e24ca66454240eef4c703e18}`;
 const Weather = () => {
   const [forecast, setForecast] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
-  
-//   const [image, setImage]= useState();
+  const [backgroundImage, setBackgroundImage] = useState(null);
+
+  //   const [image, setImage]= useState();
 
   const loadForecast = async () => {
     setRefreshing(true);
@@ -55,85 +75,49 @@ const Weather = () => {
     }
     setRefreshing(false);
   };
-  //useEffect
+
   useEffect(() => {
+    setBackgroundImage(getBackgroundImg(forecast?.current.weather[0].main));
     loadForecast();
   }, []);
   if (!forecast) {
     return (
       <SafeAreaView style={styles.loading}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color="black" />
       </SafeAreaView>
     );
   }
 
   const current = forecast.current.weather[0];
-  //if current coulds
-  if (current.description === "Clouds") {
-    image = {
-      uri: "https://images.hdqwalls.com/download/clouds-4k-5k-8k-4k-5k-8k-1920x1080.jpg",
-    };
-  }
-  //if current is clear
-  if (current.description === "Clear") {
-    image = {
-      uri: "https://images.hdqwalls.com/download/sunset-at-san-juan-de-chicua-5k-nl-800x1280.jpg",
-    };
-  }
-  //if current is rain
-  if (current.description === "Rain") {
-    image = {
-      uri: "https://images.hdqwalls.com/download/rainy-day-5k-4k-8k-5k-8k-1920x1080.jpg",
-    };
-  }
-  //if current is snow
-  if (current.description === "Snow") {
-    image = {
-      uri: "https://images.hdqwalls.com/download/snowy-mountains-5k-4k-8k-5k-8k-1920x1080.jpg",
-    };
-  }
-  //if current is thunderstorm
-  if (current.description === "Thunderstorm") {
-    image = {
-      uri: "https://images.hdqwalls.com/download/thunderstorm-5k-4k-8k-5k-8k-1920x1080.jpg",
-    };
-  }
-  //if current is drizzle
-  if (current.description === "Drizzle") {
-    image = {
-      uri: "https://images.hdqwalls.com/download/rainy-day-5k-4k-8k-5k-8k-1920x1080.jpg",
-    };
-  }
-  //if current is mist
-  if (current.description === "Mist") {
-    image = {
-      uri: "https://images.hdqwalls.com/download/mist-5k-4k-8k-5k-8k-1920x1080.jpg",
-    };
-  }
-  //if current is smoke
-  if (current.description === "Smoke") {
-    image = {
-      uri: "https://images.hdqwalls.com/download/smoke-5k-4k-8k-5k-8k-1920x1080.jpg",
-    };
-  }
-  //if current is haze
-  if (current.description === "Haze") {
-    image = {
-      uri: "https://images.hdqwalls.com/download/haze-5k-4k-8k-5k-8k-1920x1080.jpg",
-    };
-    
+  function getBackgroundImg(weather) {
+    if (weather === "Snow") return snowy;
+    if (weather === "Clear") return sunny;
+    if (weather === "Rain") return drizzle;
+    if (weather === "Haze") return haze;
+    if (weather === "Clouds") return cloudy;
+    if (weather === "Mist") return mist;
+    if (weather === "Thunderstorm") return thunderstorm;
+    if (weather === "Drizzle") return drizzle;
+    if (weather === "Fog") return fog;
+    if (weather === "Smoke") return smoke;
+    if (weather === "Dust") return dust;
+    if (weather === "Sand") return sand;
+    if (weather === "Tornado") return tornado;
   }
 
+
+  let textColor = backgroundImage !== snowy ? "white" : "black";
+  // let dayneight = backgroundImage !== day 
   return (
     <SafeAreaView style={styles.container}>
       <ImageBackground
-        source={image}
-        style={{
-          flex: 1,
-          resizeMode: "cover",
-          justifyContent: "center",
-        }}
+        source={backgroundImage}
+        style={styles.backgroundImg}
+        resizeMode="cover"
       >
+        <View style={styles.header}>
+          {/* <SearchBar fetchWeatherData={fetchWeatherData} /> */}
+        </View>
         <ScrollView
           refreshControl={
             <RefreshControl
@@ -141,13 +125,25 @@ const Weather = () => {
               onRefresh={() => loadForecast()}
             />
           }
-          style={{ margin: 20, marginTop: 60 }}
+          style={{ margin: 20, marginTop: 50 }}
         >
-          <Text style={styles.title}>{forecast.timezone.split("/")[1]}</Text>
           <Text
-            style={{ alignItems: "center", textAlign: "center", color: "#fff" }}
+            style={{
+              fontSize: 20,
+              textAlign: "center",
+              color: textColor,
+            }}
           >
-            {moment(forecast.daily[0].dt * 1000).format("DD/MM/YY")}
+            {forecast.timezone.split("/")[1]}
+          </Text>
+          <Text
+            style={{
+              alignItems: "center",
+              textAlign: "center",
+              color: textColor,
+            }}
+          >
+            {moment(forecast.daily[0].dt * 1000).format("DD/MM")}
           </Text>
           <View
             style={{
@@ -158,10 +154,14 @@ const Weather = () => {
               marginTop: 60,
             }}
           >
-            <Text style={{ fontSize: 150, textAlign: "center", color: "#fff" }}>
+            <Text
+              style={{ fontSize: 150, textAlign: "center", color: textColor }}
+            >
               {Math.round(forecast.current.temp)}
             </Text>
-            <Text style={{ fontSize: 20, textAlign: "center", color: "#fff" }}>
+            <Text
+              style={{ fontSize: 20, textAlign: "center", color: textColor }}
+            >
               °C
             </Text>
           </View>
@@ -179,7 +179,9 @@ const Weather = () => {
                 uri: `http://openweathermap.org/img/wn/${forecast.current.weather[0].icon}.png`,
               }}
             />
-            <Text style={{ fontSize: 12, textAlign: "center", color: "#000" }}>
+            <Text
+              style={{ fontSize: 12, textAlign: "center", color: textColor }}
+            >
               {current.description}
             </Text>
           </View>
@@ -191,34 +193,6 @@ const Weather = () => {
               marginTop: 20,
             }}
           >
-            {/* <View
-              style={{
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-            >
-              <Image
-                style={{ width: 30, height: 30 }}
-                source={require("../assets/temp.png")}
-              />
-              <Text style={{ fontSize: 10, fontWeight: "bold" }}>
-                {forecast.current.feels_like}°C
-              </Text>
-            </View> */}
-            {/* <View
-              style={{
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-            >
-              <Image
-                style={{ width: 30, height: 30 }}
-                source={require("../assets/humidity.png")}
-              />
-              <Text style={{ fontSize: 10, fontWeight: "bold" }}>
-                {forecast.current.humidity}%
-              </Text>
-            </View> */}
             <View
               style={{
                 flexDirection: "row",
@@ -235,102 +209,18 @@ const Weather = () => {
                 source={require("../assets/wind.png")}
               />
               <Text
-                style={{ fontSize: 10, fontWeight: "bold", marginLeft: 10 }}
+                style={{
+                  fontSize: 10,
+                  fontWeight: "bold",
+                  marginLeft: 10,
+                  color: textColor,
+                }}
               >
                 {forecast.current.wind_speed}m/s
               </Text>
             </View>
-            {/* <View
-              style={{
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-            >
-              <Image
-                style={{ width: 30, height: 30 }}
-                source={require("../assets/pressure.png")}
-              />
-              <Text style={{ fontSize: 10, fontWeight: "bold" }}>
-                {forecast.current.pressure}hPa
-              </Text>
-            </View> */}
-            {/* <View
-              style={{
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-            >
-              <Image
-                style={{ width: 30, height: 30 }}
-                source={require("../assets/visibility.png")}
-              />
-              <Text style={{ fontSize: 10, fontWeight: "bold" }}>
-                {forecast.current.visibility}m
-              </Text>
-            </View> */}
-            {/* <View
-              style={{
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-            >
-              <Image
-                style={{ width: 30, height: 30 }}
-                source={require("../assets/clouds.png")}
-              />
-              <Text style={{ fontSize: 10, fontWeight: "bold" }}>
-                {forecast.current.clouds}%
-              </Text>
-            </View> */}
           </View>
-          {/* <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginTop: 20,
-            }}
-          >
-            <View
-              style={{
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-            >
-              <Text style={{ fontSize: 20, fontWeight: "bold" }}>
-                {Math.round(forecast.daily[0].temp.max)}°C
-              </Text>
-              <Text style={{ fontSize: 20, fontWeight: "bold" }}>
-                {Math.round(forecast.daily[0].temp.min)}°C
-              </Text>
-            </View>
-            <View
-              style={{
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-            >
-              <Text style={{ fontSize: 20, fontWeight: "bold" }}>
-                {Math.round(forecast.daily[1].temp.max)}°C
-              </Text>
-              <Text style={{ fontSize: 20, fontWeight: "bold" }}>
-                {Math.round(forecast.daily[1].temp.min)}°C
-              </Text>
-            </View>
-            <View
-              style={{
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-            >
-              <Text style={{ fontSize: 20, fontWeight: "bold" }}>
-                {Math.round(forecast.daily[2].temp.max)}°C
-              </Text>
-              <Text style={{ fontSize: 20, fontWeight: "bold" }}>
-                {Math.round(forecast.daily[2].temp.min)}°C
-              </Text>
-            </View>
-          </View> */}
+
           <View
             style={{
               flexDirection: "row",
@@ -354,14 +244,14 @@ const Weather = () => {
                 }}
               />
               <Text
-                style={{ fontSize: 20, textAlign: "center", color: "#fff" }}
+                style={{ fontSize: 20, textAlign: "center", color: textColor }}
               >
                 Today
               </Text>
             </View>
 
             <View>
-              <Text style={{ fontSize: 20, color: "#fff" }}>
+              <Text style={{ fontSize: 20, color: textColor }}>
                 {Math.round(forecast.daily[0].temp.max)}°C /{" "}
                 {Math.round(forecast.daily[0].temp.min)}°C
               </Text>
@@ -390,7 +280,7 @@ const Weather = () => {
                 }}
               />
               <Text
-                style={{ fontSize: 20, textAlign: "center", color: "#fff" }}
+                style={{ fontSize: 20, textAlign: "center", color: textColor }}
               >
                 {/* {new Date(forecast.daily[1].dt * 1000).toDateString()} */}
                 Tomorrow
@@ -405,7 +295,7 @@ const Weather = () => {
                 alignItems: "center",
               }}
             >
-              <Text style={{ fontSize: 20, color: "#fff" }}>
+              <Text style={{ fontSize: 20, color: textColor }}>
                 {Math.round(forecast.daily[1].temp.max)}°C /{" "}
                 {Math.round(forecast.daily[1].temp.min)}°C
               </Text>
@@ -434,54 +324,20 @@ const Weather = () => {
                 }}
               />
               <Text
-                style={{ fontSize: 20, textAlign: "center", color: "#fff" }}
+                style={{ fontSize: 20, textAlign: "center", color: textColor }}
               >
                 {moment(forecast.daily[2].dt * 1000).format("dddd")}
               </Text>
             </View>
 
             <View>
-              <Text style={{ fontSize: 20, color: "#fff" }}>
+              <Text style={{ fontSize: 20, color: textColor }}>
                 {Math.round(forecast.daily[2].temp.max)}°C /{" "}
                 {Math.round(forecast.daily[2].temp.min)}°C
               </Text>
             </View>
           </View>
-          {/* <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginTop: 20,
-            }}
-          >
-            <View
-              style={{
-                flexDirection: "row",
-                alignContent: "center",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Image
-                style={{ width: 30, height: 30 }}
-                source={{
-                  uri: `http://openweathermap.org/img/wn/${forecast.daily[3].weather[0].icon}.png`,
-                }}
-              />
-              <Text
-                style={{ fontSize: 20, textAlign: "center", color: "#fff" }}
-              >
-                {new Date(forecast.daily[3].dt * 1000).toDateString()}
-              </Text>
-            </View>
-            <View>
-              <Text style={{ fontSize: 20, color: "#fff" }}>
-                {Math.round(forecast.daily[3].temp.max)}°C /{" "}
-                {Math.round(forecast.daily[3].temp.min)}°C
-              </Text>
-            </View>
-          </View> */}
+
           <View
             style={{
               // flexDirection: "row",
@@ -499,15 +355,169 @@ const Weather = () => {
                 style={{
                   fontSize: 20,
                   textAlign: "center",
-                  color: "#fff",
+                  color: textColor,
                   alignItems: "center",
                 }}
               >
                 5-day forecast
               </Text>
             </Pressable>
-            {/* </NavigationContainer> */}
+            <View
+              style={{
+                justifyContent: "center",
+                alignItems: "center",
+                marginTop: 20,
+              }}
+            ></View>
           </View>
+          <View
+            style={{
+              justifyContent: "center",
+              alignItems: "center",
+              marginTop: 20,
+              marginBottom: 20,
+            }}
+          >
+            <Text style={{ fontSize: 20, color: textColor }}>
+              Hourly forecast
+            </Text>
+          </View>
+
+        
+          <FlatList
+            horizontal
+            data={forecast.hourly.slice(0, 24)}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={(hour) => {
+              const weather = hour.item.weather[0];
+              var dt = new Date(hour.item.dt * 1000);
+              var time = dt.getHours() + ":" + dt.getMinutes();
+              return (
+                <View
+                  style={styles.hour}
+                  >
+           <Text
+              style={{
+                fontSize: 20,
+                textAlign: "center",
+                color: textColor,
+                alignItems: "center",
+              }}
+           >
+              {dt.toLocaleTimeString().replace(/:\d+/,' ')}
+            </Text> 
+            <Text
+              style={{
+                fontSize: 20,
+                textAlign: "center",
+                color: textColor,
+                alignItems: "center",
+              }}
+            >
+              {Math.round(hour.item.temp)}°C
+            </Text>
+            <Image
+              style={styles.smallIcon}
+              source={{
+                uri: `http://openweathermap.org/img/wn/${weather.icon}@4x.png`,
+              }}
+            />
+            <Text
+              style={{
+                fontSize: 15,
+                textAlign: "center",
+                color: textColor,
+                alignItems: "center",
+              }}
+            >
+              {weather.description}
+            </Text>
+            <Text
+              style={{
+                fontSize: 15,
+                textAlign: "center",
+                color: textColor,
+                alignItems: "center",
+              }}
+            >
+              {hour.item.pop}%
+            </Text>
+            <Text
+              style={{
+                fontSize: 15,
+                textAlign: "center",
+                color: textColor,
+                alignItems: "center",
+              }}
+            >
+              {hour.item.humidity}%
+            </Text>
+            <Text
+              style={{
+                fontSize: 15,
+                textAlign: "center",
+                color: textColor,
+                alignItems: "center",
+              }}
+            >
+              {hour.item.wind_speed}m/s
+            </Text>
+            <Text
+              style={{
+                fontSize: 15,
+                textAlign: "center",
+                color: textColor,
+                alignItems: "center",
+              }}
+            >
+              {hour.item.clouds}%
+            </Text>
+            <Text
+              style={{
+                fontSize: 15,
+                textAlign: "center",
+                color: textColor,
+                alignItems: "center",
+              }}
+            >
+              {hour.item.pressure}hPa
+            </Text>
+            <Text
+              style={{
+                fontSize: 15,
+                textAlign: "center",
+                color: textColor,
+                alignItems: "center",
+              }}
+            >
+              {hour.item.dew_point}°C
+            </Text>
+<Text
+              style={{
+                fontSize: 15,
+                textAlign: "center",
+                color: textColor,
+                alignItems: "center",
+              }}
+            >
+              {hour.item.uvi}
+            </Text>
+            <Text
+              style={{
+                fontSize: 15,
+                textAlign: "center",
+                color: textColor,
+                alignItems: "center",
+              }}
+            >
+              {hour.item.visibility}m
+            </Text>
+            
+            </View>
+          );
+        }}
+          />
+        
         </ScrollView>
       </ImageBackground>
     </SafeAreaView>
@@ -542,11 +552,16 @@ const styles = StyleSheet.create({
     elevation: 3,
     backgroundColor: "rgb(0, 0, 0,0.5)",
   },
-  // buttonText: {
-  // fontSize: 20,
-  // lineHeight: 21,
-  // fontWeight: 'normal',
-  // letterSpacing: 0.25,
-  // color: 'white',
-  // },
+  backgroundImg: {
+    flex: 1,
+    width: Dimensions.get("screen").width,
+  },
+  hour: {
+    padding:6,
+    alignItems: 'center',
+  },
+  smallIcon: {
+    width: 100,
+    height: 100,
+  },
 });
