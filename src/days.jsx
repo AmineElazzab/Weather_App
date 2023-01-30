@@ -12,6 +12,7 @@ import React, { useEffect, useState } from "react";
 import * as Location from "expo-location";
 import { AntDesign } from "@expo/vector-icons";
 import moment from "moment-timezone";
+import Compass from "../assets/compass.svg"
 
 const openWheatherKey = "fbb91821e24ca66454240eef4c703e18";
 let url = `https://api.openweathermap.org/data/2.5/onecall?&units=metric&exclude=minutely,hourly,alerts&appid=${openWheatherKey}`;
